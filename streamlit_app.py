@@ -102,8 +102,9 @@ if len(st.session_state.users)==1:
 update_location()
 
 # ---------------------------
-# 下部ナビゲーション（簡易版、安全）
+# 下部ナビゲーション（互換性あり版）
 # ---------------------------
+
 st.markdown("""
 <style>
 .navbar {
@@ -145,8 +146,13 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# URLクエリパラメータからページを取得して session_state に保存
-query_params = st.experimental_get_query_params()
+# Streamlit バージョン対応：query params取得
+try:
+    query_params = st.get_query_params()  # 最新版
+except AttributeError:
+    query_params = st.experimental_get_query_params()  # 古い版
+
+# URLからページを取得して session_state に保存
 if "page" in query_params:
     st.session_state.page = query_params["page"][0]
 
