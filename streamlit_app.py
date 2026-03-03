@@ -102,17 +102,65 @@ if len(st.session_state.users)==1:
 update_location()
 
 # ---------------------------
-# 下部ナビゲーション
+# 下部ナビゲーション（デザイン改良版）
 # ---------------------------
-st.markdown("---")
-col1,col2,col3,col4,col5 = st.columns(5)
-if col1.button("🏠ホーム"): st.session_state.page="ホーム"
-if col2.button("📘救命手順ガイド"): st.session_state.page="手順ガイド"
-if col3.button("🧾プロフィール"): st.session_state.page="プロフィール"
-if col4.button("🦺救命者プロフィール"): st.session_state.page="救助者プロフィール"
-if col5.button("⚙設定"): st.session_state.page="設定"
-if "page" not in st.session_state: st.session_state.page="ホーム"
-page = st.session_state.page
+st.markdown("""
+<style>
+/* ナビゲーションバー全体 */
+.navbar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f0f2f6;
+    border-top: 1px solid #ddd;
+    padding: 5px 0;
+    z-index: 100;
+}
+
+/* ナビボタン */
+.navbar button {
+    flex-grow: 1;
+    margin: 0 2px;
+    height: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* 各ボタンカラー */
+.home-btn { background-color: #e74c3c; }          /* 赤 */
+.guide-btn { background-color: #3498db; }         /* 青 */
+.profile-btn { background-color: #2ecc71; }       /* 緑 */
+.responder-btn { background-color: #f39c12; }    /* オレンジ */
+.setting-btn { background-color: #9b59b6; }       /* 紫 */
+</style>
+<div class="navbar">
+    <form action="#" method="POST">
+        <button name="page" value="ホーム" class="home-btn">🏠ホーム</button>
+        <button name="page" value="手順ガイド" class="guide-btn">📘救命手順ガイド</button>
+        <button name="page" value="プロフィール" class="profile-btn">🧾プロフィール</button>
+        <button name="page" value="救助者プロフィール" class="responder-btn">🦺救助者プロフィール</button>
+        <button name="page" value="設定" class="setting-btn">⚙設定</button>
+    </form>
+</div>
+""", unsafe_allow_html=True)
+
+# Streamlit側でページ切替
+# POSTリクエストで送られた場合、st.session_state.pageを更新
+if "page" not in st.session_state:
+    st.session_state.page = "ホーム"
+
+# Streamlitでは、フォーム送信後にquery paramsやセッションで受け取る形にする
+# 簡易版：ページ選択用セレクトボックスをサイドバーに隠しながら補助
+selected_page = st.sidebar.selectbox("ページ選択（内部用）", ["ホーム","手順ガイド","プロフィール","救助者プロフィール","設定"], index=["ホーム","手順ガイド","プロフィール","救助者プロフィール","設定"].index(st.session_state.page))
+st.session_state.page = selected_page
 
 # ユーザー切替（テスト用）
 if len(st.session_state.users)>1:
