@@ -106,11 +106,11 @@ update_location()
 # ---------------------------
 st.markdown("---")
 col1,col2,col3,col4,col5 = st.columns(5)
-if col1.button("🏠"): st.session_state.page="ホーム"
-if col2.button("📘"): st.session_state.page="手順ガイド"
-if col3.button("🧾"): st.session_state.page="プロフィール"
-if col4.button("🦺"): st.session_state.page="救助者プロフィール"
-if col5.button("⚙"): st.session_state.page="設定"
+if col1.button("🏠ホーム"): st.session_state.page="ホーム"
+if col2.button("📘救命手順ガイド"): st.session_state.page="手順ガイド"
+if col3.button("🧾プロフィール"): st.session_state.page="プロフィール"
+if col4.button("🦺救命者プロフィール"): st.session_state.page="救助者プロフィール"
+if col5.button("⚙設定"): st.session_state.page="設定"
 if "page" not in st.session_state: st.session_state.page="ホーム"
 page = st.session_state.page
 
