@@ -155,17 +155,26 @@ if "onboarded" not in st.session_state:
 # ホーム画面（HELPボタン主体）
 # ---------------------------
 if page=="ホーム":
-    user=st.session_state.users[st.session_state.current_user]
+    user = st.session_state.users[st.session_state.current_user]
     st.title("🆘 救急救命支援")
 
     if user["role"]=="一般":
-        situation=st.selectbox("状況を選択", ["意識なし","呼吸が弱い・ない","胸痛","転倒・骨折疑い","大出血","けいれん","その他"])
-        
-        # 大きな赤色HELPボタン
+        situation = st.selectbox(
+            "状況を選択",
+            ["意識なし","呼吸が弱い・ない","胸痛","転倒・骨折疑い","大出血","けいれん","その他"]
+        )
+
+        # 中央に大きなHELPボタン
         st.markdown("""
         <style>
+        .big-help-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
         .big-help-button button {
-            width: 100%;
+            width: 300px;
             height: 200px;
             font-size: 48px;
             font-weight: bold;
@@ -175,26 +184,38 @@ if page=="ホーム":
         }
         </style>
         """, unsafe_allow_html=True)
+
         st.markdown('<div class="big-help-button">', unsafe_allow_html=True)
-        help_pressed=st.button("🆘 HELP")
+        help_pressed = st.button("🆘 HELP")
         st.markdown('</div>', unsafe_allow_html=True)
-        
+
         if help_pressed:
             show_disclaimer()
             with st.spinner("3秒長押し中..."):
                 time.sleep(3)
-            event_id=create_help_event(st.session_state.current_user,situation)
+            event_id = create_help_event(st.session_state.current_user, situation)
             st.success("近隣の救助者へ通知しました！")
-            # 119通報ボタン（推奨）
             st.button("📞 今すぐ119へ", on_click=lambda: st.info("119へ通報してください"))
-            # 5秒以内キャンセル
-            cancel=st.button("5秒以内にキャンセル")
-            time.sleep(2)
-            if cancel:
-                st.session_state.help_events[event_id]["status"]="キャンセル"
+
+            # 5秒以内キャンセル可能
+            cancel_allowed = True
+            start_time = time.time()
+            cancel_placeholder = st.empty()
+            cancel_clicked = False
+
+            while time.time() - start_time < 5:
+                if cancel_placeholder.button("5秒以内にキャンセル"):
+                    cancel_clicked = True
+                    break
+                time.sleep(0.1)  # 微小待機
+            cancel_placeholder.empty()  # ボタンを消す
+
+            if cancel_clicked:
+                st.session_state.help_events[event_id]["status"] = "キャンセル"
                 st.warning("HELPをキャンセルしました")
             else:
-                st.session_state.active_event=event_id
+                st.session_state.active_event = event_id
+                st.info("HELP発生中です。119へ通報してください。")
 
     elif user["role"]=="救助者":
         st.subheader("🦺 出動可能 HELP通知")
@@ -207,7 +228,7 @@ if page=="ホーム":
                     if st.button(f"向かいます ({event['id'][:4]})"):
                         if st.session_state.current_user not in event["responders"]:
                             event["responders"].append(st.session_state.current_user)
-                            st.success("出動登録しました")
+                            st.success("出動登録をしました。向かってください。")
         
         st.subheader("AED位置情報")
         aed_map_data=[{"lat":a["lat"],"lon":a["lon"]} for a in st.session_state.aed_data]
