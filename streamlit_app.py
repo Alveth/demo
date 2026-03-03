@@ -25,6 +25,16 @@ if "aed_data" not in st.session_state:
         {"id": "2", "name": "市役所AED", "lat": 35.682500, "lon": 139.770000},
     ]
 
+def update_location():
+    geo = st.experimental_geolocation()
+    if geo and "latitude" in geo:
+        st.session_state.users[st.session_state.current_user]["location"] = {
+            "lat": geo["latitude"],
+            "lon": geo["longitude"]
+        }
+
+update_location()
+
 # テストユーザー（Requester）
 if "current_user" not in st.session_state:
     user_id = str(uuid.uuid4())
@@ -106,17 +116,26 @@ def notify_responders(event_id):
             })
 
 # ---------------------------
-# サイドバー
+# 下部ナビゲーション
 # ---------------------------
-st.sidebar.title("メニュー")
-page = st.sidebar.radio("画面選択", [
-    "ホーム",
-    "手順ガイド",
-    "プロフィール",
-    "救助者プロフィール",
-    "HELP履歴",
-    "設定"
-])
+st.markdown("---")
+col1, col2, col3, col4, col5 = st.columns(5)
+
+if col1.button("🏠"):
+    st.session_state.page = "ホーム"
+if col2.button("📘"):
+    st.session_state.page = "手順ガイド"
+if col3.button("🧾"):
+    st.session_state.page = "プロフィール"
+if col4.button("🦺"):
+    st.session_state.page = "救助者プロフィール"
+if col5.button("⚙"):
+    st.session_state.page = "設定"
+
+if "page" not in st.session_state:
+    st.session_state.page = "ホーム"
+
+page = st.session_state.page
 
 # ユーザー切替（テスト用）
 if len(st.session_state.users) > 1:
@@ -155,8 +174,32 @@ if page == "ホーム":
             "けいれん",
             "その他"
         ])
-        st.markdown("## ⛑ HELPボタン（3秒長押し）")
-        if st.button("🆘 HELP 発動"):
+        
+        st.markdown("""
+        <style>
+        .big-help-button button {
+            width: 100%;
+            height: 200px;
+            font-size: 48px;
+            font-weight: bold;
+            background-color: red;
+            color: white;
+            border-radius: 20px;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        st.markdown('<div class="big-help-button">', unsafe_allow_html=True)
+        help_pressed = st.button("🆘 HELP")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        if help_pressed:
+            show_disclaimer()
+            with st.spinner("3秒長押し中..."):
+                time.sleep(3)
+            event_id = create_help_event(st.session_state.current_user, situation)
+            st.success("近隣の救助者へ通知しました！")
+            st.info("📞 119へ通報してください！")
+            st.session_state.active_event = event_id
             show_disclaimer()
             with st.spinner("3秒長押し中..."):
                 time.sleep(3)
