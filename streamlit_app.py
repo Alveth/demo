@@ -102,61 +102,34 @@ if len(st.session_state.users)==1:
 update_location()
 
 # ---------------------------
-# 下部ナビゲーション（互換性あり版）
+# 下部ナビゲーション（互換性高く安全）
 # ---------------------------
+st.markdown("---")
+cols = st.columns(5)
 
-st.markdown("""
-<style>
-.navbar {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #f0f2f6;
-    border-top: 1px solid #ddd;
-    padding: 5px 0;
-    z-index: 100;
-}
-.navbar button {
-    flex-grow: 1;
-    margin: 0 2px;
-    height: 50px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 8px;
-    border: none;
-    color: white;
-    cursor: pointer;
-}
-.home-btn { background-color: #e74c3c; }
-.guide-btn { background-color: #3498db; }
-.profile-btn { background-color: #2ecc71; }
-.responder-btn { background-color: #f39c12; }
-.setting-btn { background-color: #9b59b6; }
-</style>
-<div class="navbar">
-    <button onclick="window.location.href='?page=ホーム'" class="home-btn">🏠ホーム</button>
-    <button onclick="window.location.href='?page=手順ガイド'" class="guide-btn">📘救命手順ガイド</button>
-    <button onclick="window.location.href='?page=プロフィール'" class="profile-btn">🧾プロフィール</button>
-    <button onclick="window.location.href='?page=救助者プロフィール'" class="responder-btn">🦺救助者プロフィール</button>
-    <button onclick="window.location.href='?page=設定'" class="setting-btn">⚙設定</button>
-</div>
-""", unsafe_allow_html=True)
+buttons = [
+    {"label": "🏠ホーム", "color": "#e74c3c", "page": "ホーム"},
+    {"label": "📘救命手順ガイド", "color": "#3498db", "page": "手順ガイド"},
+    {"label": "🧾プロフィール", "color": "#2ecc71", "page": "プロフィール"},
+    {"label": "🦺救助者プロフィール", "color": "#f39c12", "page": "救助者プロフィール"},
+    {"label": "⚙設定", "color": "#9b59b6", "page": "設定"},
+]
 
-# Streamlit バージョン対応：query params取得
-try:
-    query_params = st.get_query_params()  # 最新版
-except AttributeError:
-    query_params = st.experimental_get_query_params()  # 古い版
+for col, btn in zip(cols, buttons):
+    if col.button(btn["label"]):
+        st.session_state.page = btn["page"]
+    # ボタン色を反映
+    col.markdown(f"""
+        <style>
+        div.stButton button:first-child {{
+            background-color: {btn['color']};
+            color: white;
+            font-weight: bold;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
 
-# URLからページを取得して session_state に保存
-if "page" in query_params:
-    st.session_state.page = query_params["page"][0]
-
-# page 変数に必ず代入
+# page変数に必ず代入
 if "page" not in st.session_state:
     st.session_state.page = "ホーム"
 page = st.session_state.page
