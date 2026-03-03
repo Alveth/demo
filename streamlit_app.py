@@ -102,11 +102,10 @@ if len(st.session_state.users)==1:
 update_location()
 
 # ---------------------------
-# 下部ナビゲーション（デザイン改良版）
+# 下部ナビゲーション（簡易版、安全）
 # ---------------------------
 st.markdown("""
 <style>
-/* ナビゲーションバー全体 */
 .navbar {
     display: flex;
     justify-content: space-around;
@@ -120,8 +119,6 @@ st.markdown("""
     padding: 5px 0;
     z-index: 100;
 }
-
-/* ナビボタン */
 .navbar button {
     flex-grow: 1;
     margin: 0 2px;
@@ -133,34 +130,30 @@ st.markdown("""
     color: white;
     cursor: pointer;
 }
-
-/* 各ボタンカラー */
-.home-btn { background-color: #e74c3c; }          /* 赤 */
-.guide-btn { background-color: #3498db; }         /* 青 */
-.profile-btn { background-color: #2ecc71; }       /* 緑 */
-.responder-btn { background-color: #f39c12; }    /* オレンジ */
-.setting-btn { background-color: #9b59b6; }       /* 紫 */
+.home-btn { background-color: #e74c3c; }
+.guide-btn { background-color: #3498db; }
+.profile-btn { background-color: #2ecc71; }
+.responder-btn { background-color: #f39c12; }
+.setting-btn { background-color: #9b59b6; }
 </style>
 <div class="navbar">
-    <form action="#" method="POST">
-        <button name="page" value="ホーム" class="home-btn">🏠ホーム</button>
-        <button name="page" value="手順ガイド" class="guide-btn">📘救命手順ガイド</button>
-        <button name="page" value="プロフィール" class="profile-btn">🧾プロフィール</button>
-        <button name="page" value="救助者プロフィール" class="responder-btn">🦺救助者プロフィール</button>
-        <button name="page" value="設定" class="setting-btn">⚙設定</button>
-    </form>
+    <button onclick="window.location.href='?page=ホーム'" class="home-btn">🏠ホーム</button>
+    <button onclick="window.location.href='?page=手順ガイド'" class="guide-btn">📘救命手順ガイド</button>
+    <button onclick="window.location.href='?page=プロフィール'" class="profile-btn">🧾プロフィール</button>
+    <button onclick="window.location.href='?page=救助者プロフィール'" class="responder-btn">🦺救助者プロフィール</button>
+    <button onclick="window.location.href='?page=設定'" class="setting-btn">⚙設定</button>
 </div>
 """, unsafe_allow_html=True)
 
-# Streamlit側でページ切替
-# POSTリクエストで送られた場合、st.session_state.pageを更新
+# URLクエリパラメータからページを取得して session_state に保存
+query_params = st.experimental_get_query_params()
+if "page" in query_params:
+    st.session_state.page = query_params["page"][0]
+
+# page 変数に必ず代入
 if "page" not in st.session_state:
     st.session_state.page = "ホーム"
-
-# Streamlitでは、フォーム送信後にquery paramsやセッションで受け取る形にする
-# 簡易版：ページ選択用セレクトボックスをサイドバーに隠しながら補助
-selected_page = st.sidebar.selectbox("ページ選択（内部用）", ["ホーム","手順ガイド","プロフィール","救助者プロフィール","設定"], index=["ホーム","手順ガイド","プロフィール","救助者プロフィール","設定"].index(st.session_state.page))
-st.session_state.page = selected_page
+page = st.session_state.page
 
 # ユーザー切替（テスト用）
 if len(st.session_state.users)>1:
